@@ -1,10 +1,10 @@
 package controller;
 import com.stripe.exception.IdempotencyException;
-import dto.CreatePaymentResponse;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.web.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -20,7 +20,7 @@ public class paymentController{
 
 
     @postMapping("/payments")
-    public ResponseEntity<PaymentResponse> createPayment(
+    public ResponseEntity<ProblemDetail> createPayment(
             @requestHeader("Idempotency-Key") String idempotencyKey,
             @requestBody PaymentRequest request){
 
@@ -38,9 +38,17 @@ public class paymentController{
         } catch (IdempotencyException e){
             log.warn("Idempotence conflict detected. Key: {}", maskIdempotencyKey(effectiveKey));
 
-            return  ResponseEntity.status(HttpStatus.CONFLICT).body(new
-                    ErrorResponse("Payment already processed with this idempotence key."));
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ProblemDetail.forStatusAndDetail(
+                            HttpStatus.CONFLICT,
+                            "Payment already processed with this idempotence key."
+                    ));
 
+
+        } catch (InvalidPaymentRequestException e){
+            log.warn("Invalid payment request: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Invalid payment details: " + e.getMessage()));
         }
 
 
