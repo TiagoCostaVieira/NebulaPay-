@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Inclua sua classe MaskingPatternLayout no classpath -->
+    <conversionRule conversionWord="mask"
+                    converterClass="com.nebulapayment.config.MaskingPatternLayout" />
+
+    <!-- Appender para console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- Padrão de log com máscara -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %mask(%msg) %n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Appender para arquivo (opcional) -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/nebulapayment.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/nebulapayment-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %mask(%msg) %n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Logger root (padrão para toda aplicação) -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+
+    <!-- Logger específico para seu pacote -->
+    <logger name="com.nebulapayment" level="DEBUG" />
+    <logger name="com.nebulapayment.controller" level="INFO" />
+
+    <!-- Desabilitar logs verbosos de algumas bibliotecas -->
+    <logger name="org.springframework" level="WARN" />
+    <logger name="org.hibernate" level="WARN" />
+
+</configuration>
